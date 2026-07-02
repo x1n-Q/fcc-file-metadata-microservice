@@ -2,80 +2,37 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>File Metadata Microservice</title>
-    <link rel="stylesheet" href="/style.css" />
+    <title>File Metadata</title>
+    <link
+      rel="shortcut icon"
+      href="https://cdn.freecodecamp.org/universal/favicons/favicon.ico"
+      type="image/x-icon"
+    />
+    <link
+      href="https://fonts.googleapis.com/css?family=Roboto"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <link href="/public/style.css" rel="stylesheet" type="text/css" />
   </head>
   <body>
-    <main class="page">
-      <section class="card">
-        <p class="eyebrow">freeCodeCamp API Project</p>
-        <h1>File Metadata Microservice</h1>
-        <p class="intro">
-          Upload a file and receive its original name, MIME type, and size in
-          bytes.
-        </p>
-
-        <form action="/api/fileanalyse" method="post" enctype="multipart/form-data" class="upload-form">
-          <label for="upfile">Choose a file</label>
-          <input id="upfile" type="file" name="upfile" required />
-          <button type="submit">Upload</button>
+    <div class="container">
+      <h1>API Project: File Metadata Microservice</h1>
+      <h2>Usage:</h2>
+      <p>Please Upload a File ...</p>
+      <div class="view">
+        <h3 id="output"></h3>
+        <form enctype="multipart/form-data" method="POST" action="/api/fileanalyse">
+          <input id="inputfield" type="file" name="upfile" />
+          <input id="button" type="submit" value="Upload" />
         </form>
-
-        <h2>API Endpoint</h2>
-        <p><code>POST /api/fileanalyse</code></p>
-      </section>
-    </main>
-    <script>
-      (function patchFetchBlob() {
-        if (typeof window.fetch !== "function" || typeof window.Blob !== "function") {
-          return;
-        }
-
-        const nativeFetch = window.fetch.bind(window);
-
-        window.fetch = async function (...args) {
-          const response = await nativeFetch(...args);
-
-          if (!response || typeof response !== "object") {
-            return response;
-          }
-
-          const originalBlob =
-            typeof response.blob === "function" ? response.blob.bind(response) : null;
-
-          response.blob = async function () {
-            if (originalBlob) {
-              try {
-                return await originalBlob();
-              } catch (error) {
-                if (!/not implemented yet/i.test(String(error && error.message || error))) {
-                  throw error;
-                }
-              }
-            }
-
-            const type =
-              typeof response.headers?.get === "function"
-                ? response.headers.get("content-type") || ""
-                : "";
-
-            if (typeof response.arrayBuffer === "function") {
-              const buffer = await response.arrayBuffer();
-              return new Blob([buffer], { type });
-            }
-
-            if (typeof response.text === "function") {
-              const text = await response.text();
-              return new Blob([text], { type });
-            }
-
-            throw new Error("blob is not implemented yet");
-          };
-
-          return response;
-        };
-      })();
-    </script>
+      </div>
+    </div>
+    <div class="footer">
+      <p>
+        by
+        <a href="https://www.freecodecamp.org/">freeCodeCamp</a>
+      </p>
+    </div>
   </body>
 </html>

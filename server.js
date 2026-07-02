@@ -1,39 +1,54 @@
-'use strict';
+const express = require('express');
+const cors = require('cors');
+const multer = require('multer');
+const path = require('path');
 
-require('dotenv').config();
+const app = express();
+const PORT = process.env.PORT || 3004;
 
-var express = require('express');
-var cors = require('cors');
+// Configure multer - store in memory
+const upload = multer({ storage: multer.memoryStorage() });
 
-// require and use "multer"...
-var multer = require('multer');
-var upload = multer({ dest: 'uploads/' });
-
-var app = express();
-
+// Middleware
 app.use(cors());
-app.use('/public', express.static(process.cwd() + '/public'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static('public'));
 
-app.get('/', function (req, res) {
-  res.sendFile(process.cwd() + '/views/index.html');
+// Home route
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// POST /api/fileanalyse - Upload and analyze file
+// The field name MUST be 'upfile'
 app.post('/api/fileanalyse', upload.single('upfile'), (req, res) => {
-  try {
-    res.json({
-      "name": req.file.originalname,
-      "type": req.file.mimetype,
-      "size": req.file.size
-    });
-  } catch (err) {
-    res.send(400);
+  console.log('POST /api/fileanalyse');
+  console.log('File:', req.file);
+
+  // Check if file was uploaded
+  if (!req.file) {
+    console.log('No file received');
+    return res.json({ error: 'No file uploaded' });
   }
+
+  // Return file metadata with exact field names FCC expects
+  const response = {
+    name: req.file.originalname,
+    type: req.file.mimetype,
+    size: req.file.size
+  };
+
+  console.log('Response:', response);
+  res.json(response);
 });
 
-app.get('/hello', function (req, res) {
-  res.json({ greetings: "Hello, API" });
+// Health check
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'OK' });
 });
 
-app.listen(process.env.PORT || 3000, function () {
-  console.log('Node.js listening ...');
+// Start server
+app.listen(PORT, () => {
+  console.log(`🚀 File Metadata running on port ${PORT}`);
 });

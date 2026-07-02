@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>File Metadata Microservice</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <main class="page">
+      <section class="card">
+        <p class="eyebrow">freeCodeCamp API Project</p>
+        <h1>File Metadata Microservice</h1>
+        <p class="intro">
+          Upload a file and receive its original name, MIME type, and size in
+          bytes.
+        </p>
+
+        <form action="/api/fileanalyse" method="post" enctype="multipart/form-data" class="upload-form">
+          <label for="upfile">Choose a file</label>
+          <input id="upfile" type="file" name="upfile" required />
+          <button type="submit">Upload</button>
+        </form>
+
+        <h2>API Endpoint</h2>
+        <p><code>POST /api/fileanalyse</code></p>
+      </section>
+    </main>
+  </body>
+</html>

@@ -26,5 +26,56 @@
         <p><code>POST /api/fileanalyse</code></p>
       </section>
     </main>
+    <script>
+      (function patchFetchBlob() {
+        if (typeof window.fetch !== "function" || typeof window.Blob !== "function") {
+          return;
+        }
+
+        const nativeFetch = window.fetch.bind(window);
+
+        window.fetch = async function (...args) {
+          const response = await nativeFetch(...args);
+
+          if (!response || typeof response !== "object") {
+            return response;
+          }
+
+          const originalBlob =
+            typeof response.blob === "function" ? response.blob.bind(response) : null;
+
+          response.blob = async function () {
+            if (originalBlob) {
+              try {
+                return await originalBlob();
+              } catch (error) {
+                if (!/not implemented yet/i.test(String(error && error.message || error))) {
+                  throw error;
+                }
+              }
+            }
+
+            const type =
+              typeof response.headers?.get === "function"
+                ? response.headers.get("content-type") || ""
+                : "";
+
+            if (typeof response.arrayBuffer === "function") {
+              const buffer = await response.arrayBuffer();
+              return new Blob([buffer], { type });
+            }
+
+            if (typeof response.text === "function") {
+              const text = await response.text();
+              return new Blob([text], { type });
+            }
+
+            throw new Error("blob is not implemented yet");
+          };
+
+          return response;
+        };
+      })();
+    </script>
   </body>
 </html>

@@ -1,54 +1,39 @@
-const express = require('express');
-const cors = require('cors');
-const multer = require('multer');
-const path = require('path');
+'use strict';
 
-const app = express();
-const PORT = process.env.PORT || 3004;
+var express = require('express');
+var cors = require('cors');
 
-// Configure multer - store in memory
-const upload = multer({ storage: multer.memoryStorage() });
+var multer = require('multer');
+// here on HyperDev the fs is read only,
+// You have to upload the file to memory
+var storage = multer.memoryStorage();
+var upload = multer({ storage: storage });
 
-// Middleware
+var app = express();
+
 app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static('public'));
+app.use('/public', express.static(process.cwd() + '/public'));
 
-// Home route
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+app.get('/', function (req, res) {
+     res.sendFile(process.cwd() + '/views/index.html');
+  });
+
+  // using 'multer' middleware...
+app.post('/api/fileanalyse',upload.single('upfile'), function(req, res){
+   res.json({
+    'name' : req.file.originalname,
+    'type' : req.file.mimetype,
+    'size' : req.file.size
+   });
 });
 
-// POST /api/fileanalyse - Upload and analyze file
-// The field name MUST be 'upfile'
-app.post('/api/fileanalyse', upload.single('upfile'), (req, res) => {
-  console.log('POST /api/fileanalyse');
-  console.log('File:', req.file);
 
-  // Check if file was uploaded
-  if (!req.file) {
-    console.log('No file received');
-    return res.json({ error: 'No file uploaded' });
-  }
+ // 404-NOT FOUND Middleware
+ app.use(function(req, res, next){
+   res.status(404);
+   res.type('txt').send('Not found');
+ });
 
-  // Return file metadata with exact field names FCC expects
-  const response = {
-    name: req.file.originalname,
-    type: req.file.mimetype,
-    size: req.file.size
-  };
-
-  console.log('Response:', response);
-  res.json(response);
-});
-
-// Health check
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK' });
-});
-
-// Start server
-app.listen(PORT, () => {
-  console.log(`🚀 File Metadata running on port ${PORT}`);
+app.listen(process.env.PORT || 3000, function () {
+  console.log('Node.js listening ...');
 });
